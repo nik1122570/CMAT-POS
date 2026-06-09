@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-06-09 00:00:00.000000",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "pos_profile",
+  "opening_entry",
+  "sales_invoice",
+  "column_break_1",
+  "company",
+  "user",
+  "posting_date",
+  "amounts_section",
+  "expected_sales",
+  "cash_deposited",
+  "mobile_money_amount",
+  "total_declared",
+  "shortage"
+ ],
+ "fields": [
+  {
+   "default": "CMAT-SALES-DAY-DEP-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CMAT-SALES-DAY-DEP-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos_profile",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "POS Profile",
+   "options": "POS Profile",
+   "reqd": 1
+  },
+  {
+   "fieldname": "opening_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "POS Opening Entry",
+   "options": "POS Opening Entry",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cashier",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Cashier Declaration"
+  },
+  {
+   "fieldname": "expected_sales",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "System Sales Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cash_deposited",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Deposited"
+  },
+  {
+   "fieldname": "mobile_money_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Mobile Money"
+  },
+  {
+   "fieldname": "total_declared",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Declared",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shortage",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Shortage",
+   "read_only": 1
+  }
+ ],
+ "idx": 0,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-06-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "CMAT App",
+ "name": "CMAT Sales Day Deposit",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Personel",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

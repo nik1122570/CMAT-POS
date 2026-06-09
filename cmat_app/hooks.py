@@ -25,8 +25,8 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/cmat_app/css/cmat_app.css"
-# app_include_js = "/assets/cmat_app/js/cmat_app.js"
+app_include_css = "/assets/cmat_app/css/cmat_sales_day.css?v=20260609_odoo_pos"
+app_include_js = "/assets/cmat_app/js/cmat_desk_redirect.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/cmat_app/css/cmat_app.css"
@@ -60,9 +60,9 @@ app_license = "mit"
 # home_page = "login"
 
 # website user home page (by Role)
-# role_home_page = {
-# 	"Role": "home_page"
-# }
+role_home_page = {
+	"Sales Personel": "app/cmat-pos"
+}
 
 # Generators
 # ----------
@@ -246,4 +246,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-
