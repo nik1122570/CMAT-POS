@@ -590,11 +590,12 @@ cmat_app.ensure_pos_styles = function () {
 
 		.cmat-pos-order {
 			display: grid !important;
-			grid-template-rows: auto 1fr auto !important;
+			grid-template-rows: auto minmax(120px, 1fr) auto !important;
 			height: auto !important;
 			max-height: calc(100vh - 96px) !important;
 			max-height: calc(100dvh - 96px) !important;
 			min-height: 0 !important;
+			overflow: hidden !important;
 		}
 
 		.cmat-pos-order-head {
@@ -721,6 +722,9 @@ cmat_app.ensure_pos_styles = function () {
 			padding: 14px !important;
 			border-top: 1px solid rgba(20, 33, 27, 0.08) !important;
 			background: #ffffff !important;
+			max-height: min(56vh, 520px) !important;
+			overflow: auto !important;
+			overscroll-behavior: contain !important;
 		}
 
 		.cmat-pos-total {
@@ -830,6 +834,9 @@ cmat_app.ensure_pos_styles = function () {
 			border: 1px solid rgba(15, 107, 73, 0.18) !important;
 			border-radius: 8px !important;
 			background: #e6f4ec !important;
+			position: sticky !important;
+			bottom: 0 !important;
+			z-index: 2 !important;
 		}
 
 		.cmat-pos-receipt strong,
@@ -837,6 +844,15 @@ cmat_app.ensure_pos_styles = function () {
 			display: block !important;
 			color: #0f6b49 !important;
 			font-weight: 900 !important;
+			overflow-wrap: anywhere !important;
+		}
+
+		.cmat-pos-receipt .cmat-pos-btn {
+			width: 100% !important;
+			min-width: 0 !important;
+			background: #0f6b49 !important;
+			color: #ffffff !important;
+			border-color: #0f6b49 !important;
 		}
 
 		.cmat-pos-open {
@@ -882,6 +898,15 @@ cmat_app.ensure_pos_styles = function () {
 			.cmat-pos-order {
 				max-height: none !important;
 				min-height: auto !important;
+			}
+
+			.cmat-pos-payment {
+				max-height: none !important;
+				overflow: visible !important;
+			}
+
+			.cmat-pos-receipt {
+				position: static !important;
 			}
 
 			.cmat-pos-left,
@@ -1270,11 +1295,17 @@ cmat_app.SimplePOS = class {
 				? __("{0} Recorded", [this.last_invoice.transaction_type])
 				: __("Sale Saved");
 		const name = this.last_invoice.invoice || this.last_invoice.sale;
+		const doctype = this.last_invoice.invoice ? "Sales Invoice" : this.last_invoice.doctype || "CMAT POS Sale";
 		return `
 			<div class="cmat-pos-receipt">
 				<strong>${label}: ${frappe.utils.escape_html(name)}</strong>
 				<span>${format_currency(this.last_invoice.rounded_total || this.last_invoice.grand_total)}</span>
-				<button class="cmat-pos-btn" data-action="print">${__("Print Receipt")}</button>
+				<button
+					class="cmat-pos-btn"
+					data-action="print"
+					data-print-doctype="${frappe.utils.escape_html(doctype)}"
+					data-print-name="${frappe.utils.escape_html(name || "")}"
+				>${__("Print Receipt")}</button>
 			</div>
 		`;
 	}
@@ -1361,7 +1392,7 @@ cmat_app.SimplePOS = class {
 			this.render();
 		});
 		this.body.find('[data-action="checkout"]').on("click", () => this.checkout());
-		this.body.find('[data-action="print"]').on("click", () => this.print_receipt());
+	this.body.find('[data-action="print"]').on("click", (event) => this.print_receipt(event));
 		$(document)
 			.off("mousedown.cmat_pos_item_picker")
 			.on("mousedown.cmat_pos_item_picker", (event) => {
@@ -2090,8 +2121,42 @@ cmat_app.SimplePOS = class {
 			</html>`;
 	}
 
-	print_receipt() {
-		if (!this.last_invoice || !this.last_invoice.print_url) return;
-		window.open(this.last_invoice.print_url, "_blank");
+	async print_receipt(event) {
+		if (!this.last_invoice) return;
+		const button = $(event?.currentTarget || []);
+		const doctype = button.attr("data-print-doctype") || (this.last_invoice.invoice ? "Sales Invoice" : this.last_invoice.doctype || "CMAT POS Sale");
+		const name = button.attr("data-print-name") || this.last_invoice.invoice || this.last_invoice.sale;
+		if (!doctype || !name) {
+			frappe.msgprint({
+				title: __("Receipt Not Ready"),
+				indicator: "orange",
+				message: __("Please save the sale again before printing."),
+			});
+			return;
+		}
+
+		let print_url = this.last_invoice.print_url;
+		if (!print_url || !print_url.includes("doctype=") || !print_url.includes("name=")) {
+			const response = await frappe.call({
+				method: "cmat_app.pos.get_receipt_print_url",
+				args: { doctype, name },
+				freeze: true,
+				freeze_message: __("Preparing receipt"),
+			});
+			print_url = response.message && response.message.print_url;
+			if (print_url) {
+				this.last_invoice.print_url = print_url;
+			}
+		}
+
+		if (!print_url) {
+			frappe.msgprint({
+				title: __("Receipt Not Ready"),
+				indicator: "orange",
+				message: __("The receipt link could not be prepared. Please try again."),
+			});
+			return;
+		}
+		window.open(print_url, "_blank");
 	}
 };

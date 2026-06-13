@@ -1,5 +1,5 @@
 import json
-from urllib.parse import quote
+from urllib.parse import urlencode
 
 import frappe
 from frappe import _
@@ -310,9 +310,19 @@ def get_pos_items(pos_profile, search_term=""):
 			search_term=search_term or "",
 		)
 		items = result.get("items", []) if isinstance(result, dict) else result
-		return add_stock_availability(pos_profile, items)
+		return add_stock_availability(pos_profile, remove_disabled_items(items))
 	except Exception:
 		return get_basic_items(profile, search_term)
+
+
+def remove_disabled_items(items):
+	filtered_items = []
+	for item in items or []:
+		item_code = item.get("item_code") or item.get("name")
+		if item_code and frappe.get_cached_value("Item", item_code, "disabled"):
+			continue
+		filtered_items.append(item)
+	return filtered_items
 
 
 def get_basic_items(profile, search_term=""):
@@ -887,12 +897,28 @@ def get_print_url(invoice):
 		if not print_format and frappe.db.exists("Print Format", "Sales Invoice"):
 			print_format = "Sales Invoice"
 
-	return (
-		"/printview?"
-		f"doctype={quote(invoice.doctype)}&name={quote(invoice.name)}"
-		f"&format={quote(print_format or 'Standard')}"
-		f"&no_letterhead={no_letterhead}"
+	return "/printview?" + urlencode(
+		{
+			"doctype": invoice.doctype,
+			"name": invoice.name,
+			"format": print_format or "Standard",
+			"no_letterhead": no_letterhead,
+			"settings": "{}",
+		}
 	)
+
+
+@frappe.whitelist()
+def get_receipt_print_url(doctype, name):
+	if doctype not in {"CMAT POS Sale", "Sales Invoice"}:
+		frappe.throw(_("Cannot print receipt for {0}.").format(doctype))
+	if not name:
+		frappe.throw(_("Receipt name is required."))
+
+	doc = frappe.get_doc(doctype, name)
+	if not frappe.has_permission(doc.doctype, "read", doc=doc):
+		frappe.throw(_("Not permitted to print this receipt."))
+	return {"print_url": get_print_url(doc)}
 
 
 def get_user_pos_profiles():
